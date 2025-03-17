@@ -21,4 +21,4 @@ function calculateGPA($grades, $maxGPA = 4.0) {
 
     return $totalMaxGrade > 0 ? round($totalWeightedGrade / $totalMaxGrade, 2) : 0.0;
 }
-}
+};

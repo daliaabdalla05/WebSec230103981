@@ -1,14 +1,7 @@
 
-        <!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Bootstrap Example</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-</head>
-<body>
+@extends('layouts.master')
+@section('title', 'Bill')
+@section('content')
 
 <div class="container mt-3">
   <h2>Bill</h2>
@@ -43,8 +36,4 @@
     </tr>
 </tfoot>
 
-
-        
-
-  
-</body> 
+@endsection
