@@ -1,13 +1,16 @@
 @extends('layouts.master')
-@section('title', 'Test Page')
+@section('title', 'Products Page')
 @section('content')
 <div class="row mt-2">
     <div class="col col-10">
-        <h1>products</h1>
+        <h1>Products</h1>
     </div>
+   
+
     <div class="col col-2">
-        <a href="{{route('products_edit')}}" class="btn btn-success form-control">Add product</a>
-        
+        @can('add_products')
+        <a href="{{route('products_edit')}}" class="btn btn-success form-control">Add Product</a>
+        @endcan
     </div>
 </div>
 <form>
@@ -58,14 +61,19 @@
 					        <h3>{{$product->name}}</h3>
 					    </div>
 					    <div class="col col-2">
-                            
+                            @can('edit_products')
 					        <a href="{{route('products_edit', $product->id)}}" class="btn btn-success form-control">Edit</a>
-                        
+                            @endcan
 					    </div>
 					    <div class="col col-2">
-                            
+                            @can('delete_products')
 					        <a href="{{route('products_delete', $product->id)}}" class="btn btn-danger form-control">Delete</a>
-                            
+                            @endcan
+					    </div>
+                        <div class="col col-2">
+                            @can('buy_products')
+					        <a href="{{ route('products.purchase', ['id' => $product->id]) }}" class="btn btn-danger form-control">Buy</a>
+                            @endcan
 					    </div>
 					</div>
 

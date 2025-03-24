@@ -1,9 +1,8 @@
-
 @extends('layouts.master')
 @section('title', 'Products')
 @section('content')
 
-<form action="{{route('products_save', $product->id)}}" method="post">
+<form method="POST" action="{{ route('products_save') }}" enctype="multipart/form-data">
     {{ csrf_field() }}
     {{ csrf_field() }}
     @foreach($errors->all() as $error)
@@ -33,8 +32,8 @@
             <input type="numeric" class="form-control" placeholder="Price" name="price" required value="{{$product->price}}">
         </div>
         <div class="col-6">
-            <label for="model" class="form-label">Photo:</label>
-            <input type="text" class="form-control" placeholder="Photo" name="photo" required value="{{$product->photo}}">
+        <label>Photo</label>
+        <input type="file" name="photo" class="form-control">
         </div>
     </div>
     <div class="row mb-2">

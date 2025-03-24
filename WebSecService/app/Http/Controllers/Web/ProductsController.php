@@ -50,26 +50,61 @@ class ProductsController extends Controller {
 	public function save(Request $request, Product $product = null) {
 
 		$this->validate($request, [
-	        'code' => ['required', 'string', 'max:32'],
-	        'name' => ['required', 'string', 'max:128'],
-	        'model' => ['required', 'string', 'max:256'],
-	        'description' => ['required', 'string', 'max:1024'],
-	        'price' => ['required', 'numeric'],
-	    ]);
-
-		$product = $product??new Product();
-		$product->fill($request->all());
+			'code' => ['required', 'string', 'max:32'],
+			'name' => ['required', 'string', 'max:128'],
+			'model' => ['required', 'string', 'max:256'],
+			'description' => ['required', 'string', 'max:1024'],
+			'price' => ['required', 'numeric'],
+			'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif', 'max:2048'],
+		]);
+	
+		$product = $product ?? new Product();
+		$product->fill($request->except('photo'));
+	
+		if ($request->hasFile('photo')) {
+			$file = $request->file('photo');
+			$filename = time() . '_' . $file->getClientOriginalName();
+			$file->move(public_path('images'), $filename);
+			$product->photo = $filename;
+		}
+	
 		$product->save();
-
+	
 		return redirect()->route('products_list');
 	}
+	
 
 	public function delete(Request $request, Product $product) {
 
-
+		if(!auth()->user()->hasPermissionTo('delete_products')) abort(401);
 
 		$product->delete();
 
 		return redirect()->route('products_list');
 	}
+	public function buyProduct($id)
+{
+    $product = Product::findOrFail($id);
+    $user = auth()->user();
+
+    if ($user->store_credit >= $product->price) {
+        $user->store_credit -= $product->price;
+        $user->save();
+
+        Purchase::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'amount' => $product->price,
+        ]);
+
+        return redirect()->back()->with('success', 'Purchase successful using store credit!');
+    } else {
+        return redirect()->back()->with('error', 'Insufficient store credit.');
+    }
+}
+public function buy(Product $product)
+{
+    return view('buy', compact('product'));
+}
+
 } 

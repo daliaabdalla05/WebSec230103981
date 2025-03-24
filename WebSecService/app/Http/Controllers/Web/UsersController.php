@@ -6,9 +6,12 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use DB;
 use Artisan;
+
+
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -16,6 +19,15 @@ use App\Models\User;
 class UsersController extends Controller {
 
 	use ValidatesRequests;
+
+    public function list(Request $request) {
+        if(!auth()->user()->hasPermissionTo('show_users'))abort(401);
+        $query = User::select('*');
+        $query->when($request->keywords, 
+        fn($q)=> $q->where("name", "like", "%$request->keywords%"));
+        $users = $query->get();
+        return view('users.list', compact('users'));
+    }
 
 	public function register(Request $request) {
         return view('users.register');
@@ -35,12 +47,17 @@ class UsersController extends Controller {
     		return redirect()->back()->withInput($request->input())->withErrors('Invalid registration information.');
     	}
 
-    	
-    	$user =  new User();
-	    $user->name = $request->name;
-	    $user->email = $request->email;
-	    $user->password = bcrypt($request->password); //Secure
-	    $user->save();
+
+// After user creation
+$user = User::create([
+    'name' => $request->name,
+    'email' => $request->email,
+    'password' => Hash::make($request->password),
+]);
+
+// Automatically assign "customer" role
+$user->assignRole('customer');
+
 
         return redirect('/');
     }
@@ -67,24 +84,25 @@ class UsersController extends Controller {
         return redirect('/');
     }
 
-    public function profile(Request $request, User $user)
-{
-    $authUser = auth()->user();
+    public function profile(Request $request, User $user = null) {
 
-    // If no user is logged in, redirect or show error
-    if (!$authUser) {
-        return redirect()->route('login'); // or abort(403);
-    }
-
-    if ($authUser->id != $user->id) {
-        if (!$authUser->hasPermissionTo('show_users')) {
-            abort(403, 'Unauthorized');
+        $user = $user??auth()->user();
+        if(auth()->id()!=$user->id) {
+            if(!auth()->user()->hasPermissionTo('show_users')) abort(401);
         }
+
+        $permissions = [];
+        foreach($user->permissions as $permission) {
+            $permissions[] = $permission;
+        }
+        foreach($user->roles as $role) {
+            foreach($role->permissions as $permission) {
+                $permissions[] = $permission;
+            }
+        }
+
+        return view('users.profile', compact('user', 'permissions'));
     }
-
-    // Continue with profile logic...
-}
-
 
     public function edit(Request $request, User $user = null) {
    
@@ -114,17 +132,64 @@ class UsersController extends Controller {
         if(auth()->id()!=$user->id) {
             if(!auth()->user()->hasPermissionTo('show_users')) abort(401);
         }
-   
+
         $user->name = $request->name;
         $user->save();
 
-        if(auth()->user()->hasPermissionTo('edit_users')) {
+        if(auth()->user()->hasPermissionTo('admin_users')) {
 
             $user->syncRoles($request->roles);
             $user->syncPermissions($request->permissions);
 
             Artisan::call('cache:clear');
         }
+
+        //$user->syncRoles([1]);
+        //Artisan::call('cache:clear');
+
+        return redirect(route('profile', ['user'=>$user->id]));
+    }
+
+    public function delete(Request $request, User $user) {
+
+        if(!auth()->user()->hasPermissionTo('delete_users')) abort(401);
+
+        //$user->delete();
+
+        return redirect()->route('users');
+    }
+
+    public function editPassword(Request $request, User $user = null) {
+
+        $user = $user??auth()->user();
+        if(auth()->id()!=$user?->id) {
+            if(!auth()->user()->hasPermissionTo('edit_users')) abort(401);
+        }
+
+        return view('users.edit_password', compact('user'));
+    }
+
+    public function savePassword(Request $request, User $user) {
+
+        if(auth()->id()==$user?->id) {
+            
+            $this->validate($request, [
+                'password' => ['required', 'confirmed', Password::min(8)->numbers()->letters()->mixedCase()->symbols()],
+            ]);
+
+            if(!Auth::attempt(['email' => $user->email, 'password' => $request->old_password])) {
+                
+                Auth::logout();
+                return redirect('/');
+            }
+        }
+        else if(!auth()->user()->hasPermissionTo('edit_users')) {
+
+            abort(401);
+        }
+
+        $user->password = bcrypt($request->password); //Secure
+        $user->save();
 
         return redirect(route('profile', ['user'=>$user->id]));
     }
