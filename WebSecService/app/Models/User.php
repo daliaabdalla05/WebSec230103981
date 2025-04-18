@@ -22,6 +22,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'credit',
+        'facebook_id',
+        'facebook_token',
     ];
 
     /**
@@ -66,5 +68,10 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withPivot(['bought_at', 'price_at_purchase', 'status'])
             ->orderByDesc('user_bought_products.bought_at')
             ->get();
+    }
+
+    public function hasFacebook()
+    {
+        return !is_null($this->facebook_id);
     }
 }

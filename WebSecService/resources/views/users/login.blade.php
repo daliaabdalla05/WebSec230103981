@@ -24,6 +24,11 @@
       <div class="form-group mb-2">
         <button type="submit" class="btn btn-primary">Login</button>
       </div>
+      <div class="form-group mb-2">
+        <a href="{{ route('login.facebook') }}" class="btn btn-primary" style="background-color: #3b5998; border-color: #3b5998;">
+          <i class="fab fa-facebook-f me-2"></i>Login with Facebook
+        </a>
+      </div>
     </form>
     </div>
   </div>

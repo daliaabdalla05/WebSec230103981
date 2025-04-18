@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\CustomerCreditController;
 use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Web\FacebookController;
 
 // Authentication routes
 Route::get('register', [UsersController::class, 'register'])->name('register');
@@ -152,6 +153,10 @@ Route::get('/test-verification', function () {
 Route::get('/protected-test', function () {
     return 'If you can see this, your email is verified!';
 })->middleware(['auth', 'verified']);
+
+// Facebook Authentication Routes
+Route::get('login/facebook', [FacebookController::class, 'redirectToFacebook'])->name('login.facebook');
+Route::get('login/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('login.facebook.callback');
 
 
 
