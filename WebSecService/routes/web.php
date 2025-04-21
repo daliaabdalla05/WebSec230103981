@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\EmployeeController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Web\FacebookController;
+use App\Http\Controllers\Web\CommentController;
 
 // Authentication routes
 Route::get('register', [UsersController::class, 'register'])->name('register');
@@ -113,6 +114,12 @@ Route::middleware(['auth', 'verified'])->group(function() {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // Comment routes
+    Route::get('comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+    Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
 // Homepage

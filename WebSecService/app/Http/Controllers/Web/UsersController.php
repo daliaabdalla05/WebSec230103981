@@ -75,9 +75,45 @@ class UsersController extends Controller {
     }
 
     public function doLogin(Request $request) {
-    	
-    	if(!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
-            return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
+        // Check if user is blocked
+        $key = 'login_attempts_' . $request->ip();
+        $attempts = cache()->get($key, 0);
+        
+        if ($attempts >= 3) {
+            $blockedUntil = cache()->get('login_blocked_until_' . $request->ip());
+            if ($blockedUntil && now()->lt($blockedUntil)) {
+                $remainingMinutes = now()->diffInMinutes($blockedUntil);
+                return redirect()->back()
+                    ->withInput($request->input())
+                    ->withErrors(['error' => "Too many failed attempts. Please try again in {$remainingMinutes} minutes."]);
+            } else {
+                // Reset attempts if block time has passed
+                cache()->forget($key);
+                cache()->forget('login_blocked_until_' . $request->ip());
+                $attempts = 0;
+            }
+        }
+        
+        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            $attempts++;
+            cache()->put($key, $attempts, now()->addMinutes(5));
+            
+            if ($attempts >= 3) {
+                $blockedUntil = now()->addMinutes(5);
+                cache()->put('login_blocked_until_' . $request->ip(), $blockedUntil, $blockedUntil);
+                return redirect()->back()
+                    ->withInput($request->input())
+                    ->withErrors(['error' => 'Too many failed attempts. Please try again in 5 minutes.']);
+            }
+            
+            return redirect()->back()
+                ->withInput($request->input())
+                ->withErrors(['error' => 'Invalid login information. ' . (3 - $attempts) . ' attempts remaining.']);
+        }
+
+        // Reset attempts on successful login
+        cache()->forget($key);
+        cache()->forget('login_blocked_until_' . $request->ip());
 
         $user = User::where('email', $request->email)->first();
         Auth::setUser($user);

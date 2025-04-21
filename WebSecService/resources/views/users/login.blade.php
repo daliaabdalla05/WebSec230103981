@@ -7,11 +7,16 @@
       <form action="{{route('do_login')}}" method="post">
       {{ csrf_field() }}
       <div class="form-group">
-        @foreach($errors->all() as $error)
+        @if($errors->any())
         <div class="alert alert-danger">
-          <strong>Error!</strong> {{$error}}
+          <strong>Error!</strong>
+          <ul class="mb-0">
+            @foreach($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
         </div>
-        @endforeach
+        @endif
       </div>
       <div class="form-group mb-2">
         <label for="model" class="form-label">Email:</label>

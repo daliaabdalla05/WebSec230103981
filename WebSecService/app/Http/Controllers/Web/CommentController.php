@@ -2,34 +2,54 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Comment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+
 class CommentController extends Controller
 {
+    public function index()
+    {
+        $comments = Comment::with(['user', 'approver'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('comments.index', compact('comments'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'content' => 'required|string|max:1000',
+            'content' => 'required|string|min:3|max:1000',
         ]);
 
-        Comment::create([
-            'user_id' => auth()->id(),
-            'product_id' => $request->product_id,
+        $comment = Comment::create([
+            'user_id' => Auth::id(),
             'content' => $request->content,
         ]);
 
-        return back()->with('message', 'Comment submitted for approval.');
+        return redirect()->back()->with('success', 'Comment submitted successfully. It will be visible after approval.');
     }
 
-    public function approve($id)
+    public function approve(Comment $comment)
     {
-        $comment = Comment::findOrFail($id);
-        $comment->is_approved = true;
-        $comment->save();
+        abort_unless(Auth::user()->hasRole('Employee') || Auth::user()->hasRole('Admin'), 403);
 
-        return back()->with('message', 'Comment approved.');
+        $comment->update([
+            'is_approved' => true,
+            'approved_by' => Auth::id(),
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Comment approved successfully.');
+    }
+
+    public function destroy(Comment $comment)
+    {
+        abort_unless(Auth::user()->hasRole('Employee') || Auth::user()->hasRole('Admin'), 403);
+
+        $comment->delete();
+
+        return redirect()->back()->with('success', 'Comment deleted successfully.');
     }
 }

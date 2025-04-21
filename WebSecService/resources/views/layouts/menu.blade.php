@@ -60,6 +60,9 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="{{ route('comments.index') }}">Comments</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="{{route('do_logout')}}">Logout</a>
             </li>
             @else
