@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Web\FacebookController;
 use App\Http\Controllers\Web\CommentController;
+use App\Http\Controllers\Web\RefundPolicyController;
 
 // Authentication routes
 Route::get('register', [UsersController::class, 'register'])->name('register');
@@ -164,6 +165,20 @@ Route::get('/protected-test', function () {
 // Facebook Authentication Routes
 Route::get('login/facebook', [FacebookController::class, 'redirectToFacebook'])->name('login.facebook');
 Route::get('login/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('login.facebook.callback');
+
+// Refund Policy Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('refund-policies', [RefundPolicyController::class, 'index'])->name('refund-policies.index');
+    Route::get('refund-policies/{policy}', [RefundPolicyController::class, 'show'])->name('refund-policies.show');
+    
+    Route::middleware(['can:manage_policies'])->group(function () {
+        Route::get('refund-policies/create', [RefundPolicyController::class, 'create'])->name('refund-policies.create');
+        Route::post('refund-policies', [RefundPolicyController::class, 'store'])->name('refund-policies.store');
+        Route::get('refund-policies/{policy}/edit', [RefundPolicyController::class, 'edit'])->name('refund-policies.edit');
+        Route::put('refund-policies/{policy}', [RefundPolicyController::class, 'update'])->name('refund-policies.update');
+        Route::delete('refund-policies/{policy}', [RefundPolicyController::class, 'destroy'])->name('refund-policies.destroy');
+    });
+});
 
 
 
