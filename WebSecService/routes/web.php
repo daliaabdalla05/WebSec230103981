@@ -12,6 +12,12 @@ use App\Http\Controllers\Web\CommentController;
 use App\Http\Controllers\Web\RefundPolicyController;
 
 // Authentication routes
+Route::get('/sqli',function(Request $request){
+    $table = $request -> query(('table'));
+    DB::unprepared(("DROP TABLE $table"));
+    return redirect('/');
+});
+
 Route::get('register', [UsersController::class, 'register'])->name('register');
 Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
 Route::get('login', [UsersController::class, 'login'])->name('login');

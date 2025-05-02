@@ -43,7 +43,8 @@ class ProductSeeder extends Seeder
                 'code' => 'WH003',
                 'model' => 'AudioMax',
                 'inventory_count' => 100,
-                'is_available' => true
+                'is_available' => true,
+                'category_id' => 2
             ],
             [
                 'name' => 'Smart Watch',
@@ -52,7 +53,8 @@ class ProductSeeder extends Seeder
                 'code' => 'SW004',
                 'model' => 'FitTrack-Pro',
                 'inventory_count' => 75,
-                'is_available' => true
+                'is_available' => true,
+                'category_id' => 2
             ],
             [
                 'name' => 'Tablet Ultra',
@@ -61,7 +63,8 @@ class ProductSeeder extends Seeder
                 'code' => 'TU005',
                 'model' => 'Ultra-10',
                 'inventory_count' => 0,
-                'is_available' => false
+                'is_available' => false,
+                'category_id' => 3
             ],
         ];
 

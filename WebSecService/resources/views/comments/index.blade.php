@@ -30,7 +30,7 @@
                     @foreach($comments as $comment)
                         <div class="card mb-3">
                             <div class="card-body">
-                                <p class="card-text">{{ $comment->content }}</p>
+                                <p class="card-text">{!! $comment->content !!}</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">
                                         By: {{ $comment->user->name }}
