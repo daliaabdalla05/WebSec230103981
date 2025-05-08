@@ -18,5 +18,10 @@ class CategorySeeder extends Seeder
             'name' => 'Accessories',
             'description' => 'Device accessories and peripherals'
         ]);
+
+        Category::create([
+            'name' => 'Computers',
+            'description' => 'Computers and computing devices'
+        ]);
     }
 } 

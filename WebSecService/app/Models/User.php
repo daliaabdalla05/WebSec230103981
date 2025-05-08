@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -83,5 +87,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function approvedComments()
     {
         return $this->hasMany(Comment::class, 'approved_by');
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new class extends VerifyEmail {
+            public function toMail($notifiable)
+            {
+                $verificationUrl = $this->verificationUrl($notifiable);
+                // Force the URL to use the current request's host
+                if (request()) {
+                    $parsed = parse_url($verificationUrl);
+                    $host = request()->getSchemeAndHttpHost();
+                    $verificationUrl = $host . $parsed['path'] . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+                }
+                return (new MailMessage)
+                    ->subject('Verify Email Address')
+                    ->line('Click the button below to verify your email address.')
+                    ->action('Verify Email Address', $verificationUrl)
+                    ->line('If you did not create an account, no further action is required.');
+            }
+        });
     }
 }

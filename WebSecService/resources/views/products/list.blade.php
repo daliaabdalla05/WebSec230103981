@@ -1,6 +1,9 @@
 @extends('layouts.master')
 @section('title', 'Products')
 @section('content')
+@php
+    $products = $products ?? collect();
+@endphp
 <div class="row mb-3">
     <div class="col">
         <div class="card bg-light border-info">
