@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Web\FacebookController;
 use App\Http\Controllers\Web\CommentController;
 use App\Http\Controllers\Web\RefundPolicyController;
+use App\Http\Controllers\Web\CryptographyController;
 
 // Authentication routes
 Route::get('/sqli',function(Request $request){
@@ -144,6 +145,7 @@ Route::get('/even', function () {
     return view('even');
 });
 
+
 Route::get('/prime', function () {
     return view('prime');
 });
@@ -185,6 +187,10 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('refund-policies/{policy}', [RefundPolicyController::class, 'destroy'])->name('refund-policies.destroy');
     });
 });
+
+// Cryptography routes
+Route::get('/cryptography', [CryptographyController::class, 'index'])->name('cryptography');
+Route::post('/cryptography', [CryptographyController::class, 'process'])->name('cryptography.process');
 
 
 

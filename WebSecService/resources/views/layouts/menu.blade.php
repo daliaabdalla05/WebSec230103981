@@ -16,7 +16,9 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{route('products_list')}}">Store</a>
             </li>
-            
+            <li class="nav-item">
+                <a class="nav-link" href="./cryptography">Cryptography</a>
+            </li>
             @auth
                 @if(auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Employee'))
                 <li class="nav-item">
